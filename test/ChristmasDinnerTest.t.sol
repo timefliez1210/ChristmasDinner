@@ -171,7 +171,6 @@ contract ChristmasDinnerTest is Test {
     }
 
     // Withdraw Scenarios
-
     function test_withdrawAsNonHost() public {
         vm.startPrank(user2);
         cd.deposit(address(weth), 1e18);
