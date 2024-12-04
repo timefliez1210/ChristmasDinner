@@ -14,9 +14,9 @@ contract ChristmasDinnerTest is Test {
 
     uint256 constant DEADLINE = 7;
     address deployer = makeAddr("deployer");
-    address user1 = makeAddr("user1");
-    address user2 = makeAddr("user2");
-    address user3 = makeAddr("user3");
+    address user1;
+    address user2;
+    address user3;
 
     function setUp() public {
         wbtc = new ERC20Mock();
@@ -72,6 +72,20 @@ contract ChristmasDinnerTest is Test {
         cd.refund();
         assertEq(weth.balanceOf(address(cd)), 0);
         assertEq(weth.balanceOf(user1), userBalanceBefore);
+    }
+
+    function test_refundWithEther() public {
+        address payable _cd = payable(address(cd));
+        vm.deal(user1, 10e18);
+        vm.prank(user1);
+        (bool sent,) = _cd.call{value: 1e18}("");
+        require(sent, "transfer failed");
+        assertEq(user1.balance, 9e18);
+        assertEq(address(cd).balance, 1e18);
+        vm.prank(user1);
+        cd.refund();
+        assertEq(user1.balance, 10e18);
+        assertEq(address(cd).balance, 0);
     }
 
     // Change Participation Status Scenarios
@@ -138,6 +152,16 @@ contract ChristmasDinnerTest is Test {
         cd.deposit(address(weth), 2e18);
         assertEq(weth.balanceOf(address(cd)), 2e18);
         assertEq(wbtc.balanceOf(address(cd)), 1e18);
+    }
+
+    function test_depositEther() public {
+        address payable _cd = payable(address(cd));
+        vm.deal(user1, 10e18);
+        vm.prank(user1);
+        (bool sent,) = _cd.call{value: 1e18}("");
+        require(sent, "transfer failed");
+        assertEq(user1.balance, 9e18);
+        assertEq(address(cd).balance, 1e18);
     }
 
     ////////////////////////////////////////////////////////////////

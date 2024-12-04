@@ -43,6 +43,7 @@ contract ChristmasDinner {
     bool private locked = false;
     mapping (address user => bool) participant;
     mapping (address user => mapping (address token => uint256 balance )) balances;
+    mapping (address user => uint256 amount) etherBalance;
     mapping (address token => bool ) whitelisted;
 
     constructor (address _WBTC, address _WETH, address _USDC) {
@@ -133,12 +134,9 @@ contract ChristmasDinner {
      * CEI does not necessarly need to be followed.
      */
     function refund() external nonReentrant beforeDeadline {
-        i_WETH.safeTransfer(msg.sender, balances[msg.sender][address(i_WETH)]);
-        balances[msg.sender][address(i_WETH)] = 0;
-        i_WBTC.safeTransfer(msg.sender, balances[msg.sender][address(i_WBTC)]);
-        balances[msg.sender][address(i_WBTC)] = 0;
-        i_USDC.safeTransfer(msg.sender, balances[msg.sender][address(i_USDC)]);
-        balances[msg.sender][address(i_USDC)] = 0;
+        address payable _to = payable(msg.sender);
+        _refundERC20(_to);
+        _refundETH(_to);
         emit Refunded(msg.sender);
     }
 
@@ -199,5 +197,32 @@ contract ChristmasDinner {
         i_WETH.safeTransfer(_host, i_WETH.balanceOf(address(this)));
         i_WBTC.safeTransfer(_host, i_WBTC.balanceOf(address(this)));
         i_USDC.safeTransfer(_host, i_USDC.balanceOf(address(this)));
+    }
+    ///////////////////////// Receive  Function to handle Ether Deposits  //////////////////////////
+    /**
+     * @dev handles accidentally sending ether, users sending ether to this contract will still be tracked 
+     * with their balances and participation status.
+     */
+    receive() external payable {
+        etherBalance[msg.sender] += msg.value;
+    }
+
+    ////////////////////////////////////////////////////////////////
+    /////////////////      Internal Functions         //////////////
+    ////////////////////////////////////////////////////////////////
+
+    function _refundERC20(address _to) internal {
+        i_WETH.safeTransfer(_to, balances[_to][address(i_WETH)]);
+        i_WBTC.safeTransfer(_to, balances[_to][address(i_WBTC)]);
+        i_USDC.safeTransfer(_to, balances[_to][address(i_USDC)]);
+        balances[_to][address(i_USDC)] = 0;
+        balances[_to][address(i_WBTC)] = 0;
+        balances[_to][address(i_WETH)] = 0;
+    }
+
+    function _refundETH(address payable _to) internal {
+        uint256 refundValue = etherBalance[_to];
+        etherBalance[_to] = 0;
+        _to.transfer(refundValue);
     }
 }
