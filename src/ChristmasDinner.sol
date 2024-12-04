@@ -108,6 +108,7 @@ contract ChristmasDinner {
      * Allows a user to sign-up other users.
      * Assumes that no weird ERC20s or any ERC20s outside the whitelisted tokens need to be handled.
      * Assumes general trust relationship between the users of this contract.
+     * Does not allow signing up with Ether, for Ether signups use receive()
      * @param _token the token the user wishes to deposit
      * @param _amount the amount the user wishes to contribute
      */
@@ -187,8 +188,6 @@ contract ChristmasDinner {
 
     /**
      * @dev withdraws all tokens from the contract into the host wallet, to fascilitate the event.
-     * Transfers Dust Amounts of WETH and WBTC, since we are using swapExactOutput, 
-     * as precaution to not leave any funds within the contract
      * we do not have reentrancy considerations, since this function is supposed to sweep the contract anyway 
      */
 
@@ -200,7 +199,7 @@ contract ChristmasDinner {
     }
     ///////////////////////// Receive  Function to handle Ether Deposits  //////////////////////////
     /**
-     * @dev handles accidentally sending ether, users sending ether to this contract will still be tracked 
+     * @dev handles ether signups, users sending ether to this contract will still be tracked 
      * with their balances and participation status.
      */
     receive() external payable {
@@ -211,6 +210,11 @@ contract ChristmasDinner {
     /////////////////      Internal Functions         //////////////
     ////////////////////////////////////////////////////////////////
 
+    /**
+     * @dev ERC20 withdrawal of all user funds. No concern for Reentrancy
+     * since refund() uses a Mutex Lock
+     * @param _to payable address passed from refund()
+     */
     function _refundERC20(address _to) internal {
         i_WETH.safeTransfer(_to, balances[_to][address(i_WETH)]);
         i_WBTC.safeTransfer(_to, balances[_to][address(i_WBTC)]);
@@ -220,9 +224,14 @@ contract ChristmasDinner {
         balances[_to][address(i_WETH)] = 0;
     }
 
+    /**
+     * @dev ERC20 withdrawal of all user funds. No concern for Reentrancy
+     * since refund() uses a Mutex Lock
+     * @param _to payable address passed from refund()
+     */
     function _refundETH(address payable _to) internal {
         uint256 refundValue = etherBalance[_to];
-        etherBalance[_to] = 0;
         _to.transfer(refundValue);
+        etherBalance[_to] = 0;
     }
 }

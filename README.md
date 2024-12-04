@@ -1,21 +1,31 @@
-## Foundry
+## Christmas Dinner
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Which problems do we solve:
 
-Foundry consists of:
+-   **Funding Security**: Organizing a social event is tough, people often say "we will attend" but take forever to pay their share, with our Christmas Dinner Contract we directly "force" the attendees to pay upon signup, so the host can plan properly knowing the total budget after deadline.
+-   **Organization**: Through funding security hosts will have a way easier time to arrange the event which fits the given budget. No Backsies.
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
 
-## Documentation
+Roles and Actors:
+- ```Host```: The person doing the organization of the event. Receiver of the funds by the end of ```deadline```. Privilegded Role, which can be handed over to any ```Participant``` by the current ```host```
+- ```Participant```: Attendees of the event which provided some sort of funding. ```Participant``` can become new ```Host```, can continue sending money as Generous Donation, can sign up friends and can become ```Funder```.
+- ```Funder```: Former Participants which left their funds in the contract as donation, but can not attend the event. ```Funder``` can become ```Participant``` again BEFORE deadline ends.
 
-https://book.getfoundry.sh/
+
+
+Key Assumptions:
+- There is some trust between the host and attendees
+- Only Whitelisted tokens and ether will be handled.
+
+
 
 ## Usage
 
 ### Build
+
+```shell
+$ forge install
+```
 
 ```shell
 $ forge build
@@ -27,40 +37,7 @@ $ forge build
 $ forge test
 ```
 
-### Format
-
 ```shell
-$ forge fmt
+$ forge coverage
 ```
 
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
