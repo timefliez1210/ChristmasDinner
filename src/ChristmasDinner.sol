@@ -19,12 +19,12 @@ contract ChristmasDinner {
     ////////////////////////////////////////////////////////////////
     //////////////////        Custom Events        /////////////////
     ////////////////////////////////////////////////////////////////
-    event NewHost(address);
-    event NewSignup(address, uint256, bool);
-    event GenerousAdditionalContribution(address, uint256);
-    event ChangedParticipation(address, bool);
-    event Refunded(address);
-    event DeadlineSet(uint256);
+    event NewHost(address indexed);
+    event NewSignup(address indexed, uint256 indexed, bool indexed);
+    event GenerousAdditionalContribution(address indexed, uint256 indexed);
+    event ChangedParticipation(address indexed, bool indexed);
+    event Refunded(address indexed);
+    event DeadlineSet(uint256 indexed);
 
     ////////////////////////////////////////////////////////////////
     //////////////////         Immutables          /////////////////
@@ -204,6 +204,7 @@ contract ChristmasDinner {
      */
     receive() external payable {
         etherBalance[msg.sender] += msg.value;
+        emit NewSignup(msg.sender, msg.value, true);
     }
 
     ////////////////////////////////////////////////////////////////

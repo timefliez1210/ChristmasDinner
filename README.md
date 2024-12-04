@@ -16,7 +16,7 @@ Roles and Actors:
 Key Assumptions:
 - There is some trust between the host and attendees
 - Only Whitelisted tokens and ether will be handled.
-
+- Wallet addresses will be checked at the event, should ```participant``` return false, or the address wouldn't be in the mapping at all, people can not get in!
 
 
 ## Usage
